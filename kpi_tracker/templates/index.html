@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>KPI Tracker Login</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body class="container">
+  <h1>KPI Tracker</h1>
+  <p>Track KPI target vs actual, monthly and YTD, project monitoring, and executive dashboards.</p>
+  <article>
+    <h3>Login</h3>
+    <form id="login-form">
+      <input name="email" type="email" placeholder="Email" required>
+      <input name="password" type="password" placeholder="Password" required>
+      <button type="submit">Sign in</button>
+    </form>
+    <small>Default admin: admin@kpi.local / ChangeMe123!</small>
+  </article>
+
+  <article>
+    <h3>SSO Ready</h3>
+    <p>Use OAuth endpoints for Google / Microsoft 365 integration setup.</p>
+    <pre>/api/v1/auth/oauth/providers</pre>
+  </article>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const payload = Object.fromEntries(form.entries());
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        alert('Login failed');
+        return;
+      }
+      const data = await res.json();
+      localStorage.setItem('kpi_token', data.access_token);
+      localStorage.setItem('kpi_role', data.role);
+      window.location.href = '/app';
+    });
+  </script>
+</body>
+</html>
