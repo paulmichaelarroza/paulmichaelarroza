@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>KPI Tracker Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body class="container">
+  <h1>Executive KPI Dashboard</h1>
+  <p id="me"></p>
+
+  <section>
+    <h3>Summary</h3>
+    <div id="summary">Loading...</div>
+  </section>
+
+  <section>
+    <h3>Department KRA View</h3>
+    <table>
+      <thead><tr><th>Department</th><th>KRA</th><th>Achievement %</th></tr></thead>
+      <tbody id="dept-body"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h3>Forecast (Next Period)</h3>
+    <ul id="forecast-list"></ul>
+  </section>
+
+  <script>
+    const token = localStorage.getItem('kpi_token');
+    if (!token) window.location.href = '/';
+
+    const authHeaders = { 'Authorization': `Bearer ${token}` };
+
+    async function load() {
+      const meRes = await fetch('/api/v1/me', { headers: authHeaders });
+      if (!meRes.ok) {
+        localStorage.removeItem('kpi_token');
+        window.location.href = '/';
+        return;
+      }
+      const me = await meRes.json();
+      document.getElementById('me').innerText = `${me.name} (${me.role})`;
+
+      const dashRes = await fetch('/api/v1/dashboard', { headers: authHeaders });
+      if (!dashRes.ok) {
+        document.getElementById('summary').innerText = 'Manager/Admin access required for executive dashboard.';
+        return;
+      }
+      const data = await dashRes.json();
+      const s = data.summary;
+      document.getElementById('summary').innerText =
+        `Total KPIs: ${s.total_kpis} | Avg Achievement: ${s.avg_achievement_pct}% | Below Threshold: ${s.below_threshold} | YTD: ${s.ytd_achievement_pct}% | Projects At Risk: ${s.projects_at_risk}`;
+
+      const deptBody = document.getElementById('dept-body');
+      deptBody.innerHTML = '';
+      data.department_kra.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.department ?? ''}</td><td>${row.kra ?? ''}</td><td>${(row.achievement_pct ?? 0).toFixed(2)}%</td>`;
+        deptBody.appendChild(tr);
+      });
+
+      const forecastList = document.getElementById('forecast-list');
+      forecastList.innerHTML = '';
+      data.forecast.forEach(row => {
+        const li = document.createElement('li');
+        li.innerText = `${row.title}: ${row.forecast_next ?? 'N/A'}`;
+        forecastList.appendChild(li);
+      });
+    }
+
+    load();
+  </script>
+</body>
+</html>
