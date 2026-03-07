@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --strawberry-red: #e63946;
+  --cream-white: #fffaf3;
+  --pastel-pink: #ffd6e0;
+  --soft-peach: #ffc9a9;
+  --leaf-green: #86b56d;
+}
+
+body {
+  background: radial-gradient(circle at top right, var(--pastel-pink), var(--cream-white) 45%);
+  color: #4b2230;
+  font-family: "Nunito", "Poppins", system-ui, sans-serif;
+}
+
+.card {
+  @apply rounded-3xl bg-white/80 shadow-lg backdrop-blur-sm border border-white;
+}
+
+.btn-primary {
+  @apply rounded-full px-5 py-3 font-semibold text-white bg-red-500 hover:bg-red-600 transition;
+}
