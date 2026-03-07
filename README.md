@@ -1,66 +1,69 @@
-# Scan to Text Application
+# Enterprise AI-Powered KPI Tracker
 
-A simple Python application that can:
+Production-ready KPI monitoring platform for multi-site enterprise operations.
 
-1. **Scan image files into text** (OCR) with readability cleanup.
-2. **Read a specific section** from text content using start/end markers.
+## Covered Enterprise Requirements
+- Multi-site KPI hierarchy: Company → Site → Department → KRA → KPI.
+- Sites pre-seeded: Glacier South, Glacier Pulilan, Glacier Manila, Glacier Davao.
+- RBAC roles: Super Admin, Executive, Site Manager, Encoder.
+- Auth methods: Email/password plus OAuth2 stubs for Google/Microsoft.
+- KPI computation: target/actual, variance, achievement %, HIT/MISS/AT_RISK.
+- Period tracking: monthly data model with quarterly/YTD/annual rollup support.
+- Executive dashboards: scorecards, site comparison, top/missed KPIs, forecast alerts.
+- Project monitoring module with ownership, progress, status.
+- AI forecasting module using time-series regression for risk alerts.
+- Data encoding: manual entry + CSV/Excel bulk upload.
+- Alert foundation: notification table and service hooks for Email/Teams/Slack.
+- REST APIs for integration (WMS/ERP/CRM/Power BI).
+- Dockerized deployment with PostgreSQL.
 
-## Features
+## Architecture
+- **Frontend:** React + Vite + Recharts (`frontend/`)
+- **Backend:** FastAPI + SQLAlchemy (`backend/`)
+- **DB:** PostgreSQL (`docker-compose`)
+- **ML Forecasting:** scikit-learn regression (`backend/app/ml/forecasting.py`)
 
-- OCR preprocessing (grayscale + denoise + threshold) to improve readability.
-- Text cleanup to remove noisy spaces and extra blank lines.
-- Section extraction by marker:
-  - Start marker required
-  - End marker optional
-  - Case-insensitive by default
-
-## Setup
-
+## Quick Start (Docker)
 ```bash
+docker compose up --build -d
+```
+
+Seed data:
+```bash
+docker compose exec backend python -m app.seed.seed_data
+```
+
+Access:
+- Frontend: http://localhost:3000
+- API docs: http://localhost:8000/docs
+
+## Local Development
+### Backend
+```bash
+cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+uvicorn app.main:app --reload
 ```
 
-> Note: OCR requires the **Tesseract** binary installed in your OS.
-
-## Usage
-
-### 1) Scan image to text
-
+### Frontend
 ```bash
-python scan_to_text_app.py scan-image --input sample.png --output output.txt
+cd frontend
+npm install
+npm run dev
 ```
 
-Optional OCR page segmentation mode:
+## Demo Users
+- Super Admin: `admin@kpi.local / admin123`
+- Executive: `exec@kpi.local / exec123`
+- Site Managers/Encoders are seeded per site (`manager{siteId}@kpi.local`, `encoder{siteId}@kpi.local`).
 
-```bash
-python scan_to_text_app.py scan-image --input sample.png --psm 6
-```
+## API Summary
+See `docs/api.md` for endpoint details.
 
-### 2) Read a specific section from file
+## Database Schema
+See `docs/database_schema.sql` for DDL.
 
-```bash
-python scan_to_text_app.py read-section \
-  --input output.txt \
-  --start "Invoice Number:" \
-  --end "Footer" \
-  --output invoice_section.txt
-```
-
-If you omit `--end`, it returns everything after `--start`.
-
-### 3) Case-sensitive matching
-
-```bash
-python scan_to_text_app.py read-section \
-  --input output.txt \
-  --start "Exact Header" \
-  --case-sensitive
-```
-
-## Run tests
-
-```bash
-pytest -q
-```
+## Sample Dataset
+See `data/sample_kpi_actuals.csv` for bulk KPI import template.
