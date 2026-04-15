@@ -1,14 +1,19 @@
 # Scan to Text Application
 
-A simple Python application that can:
+A Python OCR workflow that can:
 
-1. **Scan image files into text** (OCR) with readability cleanup.
-2. **Read a specific section** from text content using start/end markers.
+1. **Scan one or many image files into text**.
+2. **Extract and normalize `net weight` values** (`1,25` ➜ `1.25`).
+3. **Save OCR records to a SQLite database**.
+4. **Export stored OCR records to Excel (`.xlsx`)**.
 
 ## Features
 
 - OCR preprocessing (grayscale + denoise + threshold) to improve readability.
-- Text cleanup to remove noisy spaces and extra blank lines.
+- Batch image processing.
+- Net weight extraction from OCR text (`Net Weight`, `NET WT`) with decimal normalization.
+- Persistent storage in SQLite.
+- Excel export using `openpyxl`.
 - Section extraction by marker:
   - Start marker required
   - End marker optional
@@ -26,19 +31,36 @@ pip install -r requirements.txt
 
 ## Usage
 
-### 1) Scan image to text
+### 1) Scan one image to text
 
 ```bash
 python scan_to_text_app.py scan-image --input sample.png --output output.txt
 ```
 
-Optional OCR page segmentation mode:
+### 2) Process multiple images (batch)
+
+Print extracted net weights:
 
 ```bash
-python scan_to_text_app.py scan-image --input sample.png --psm 6
+python scan_to_text_app.py process-batch --inputs img1.png img2.png img3.png
 ```
 
-### 2) Read a specific section from file
+Process and save to SQLite:
+
+```bash
+python scan_to_text_app.py process-batch \
+  --inputs img1.png img2.png img3.png \
+  --db ocr_records.db \
+  --save
+```
+
+### 3) Export DB records to Excel
+
+```bash
+python scan_to_text_app.py export-excel --db ocr_records.db --output ocr_records.xlsx
+```
+
+### 4) Read a specific section from file
 
 ```bash
 python scan_to_text_app.py read-section \
@@ -49,15 +71,6 @@ python scan_to_text_app.py read-section \
 ```
 
 If you omit `--end`, it returns everything after `--start`.
-
-### 3) Case-sensitive matching
-
-```bash
-python scan_to_text_app.py read-section \
-  --input output.txt \
-  --start "Exact Header" \
-  --case-sensitive
-```
 
 ## Run tests
 
